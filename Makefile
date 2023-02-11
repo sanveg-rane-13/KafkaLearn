@@ -1,15 +1,11 @@
-CXXFLAGS = -O3 -ggdb -m64
-LDFLAGS  = -m64
+PROJECT_NAME=kafka
 
-all: main.exe
-.PRECIOUS: main.exe main.o
-.PHONY: all clean
+DOCKER_CC?=gcc
+DOCKER_CXX?=g++
 
-%.o: %.cc
-    $(CXX) -c $< -o $@ $(CXXFLAGS)
+include build_tools/Makefile
 
-%.exe: %.o
-    $(CXX) $^ -o $@ $(LDFLAGS)
-
-clean:
-    rm -f main.o main.exe
+# User-defined target
+.PHONY: kafka-target
+kafka-target: ## kafka
+	@echo "This is an kafka project"
