@@ -18,6 +18,21 @@ A kafka connecter project written in cpp
     docker build -t kafka:x.x .
     `   
 
+- Launch a docker container and run bash
+    `
+    docker run -it --rm --name=kafka \
+            --mount type=bind,source=${PWD},target=/src \
+            kafka:0.1 \
+            bash
+    `
+
+- Build target
+    `
+    mkdir build && cd build
+    cmake ..
+    make
+    `
+
 ## About
 
 - Cpp based kafka basics tutorial
