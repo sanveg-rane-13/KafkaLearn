@@ -2,8 +2,8 @@ PROJECT_NAME=kafka
 PROJECT_VERSION=1.0
 DOCKER_DEPS_VERSION=1.0
 
-DOCKER_CC?=gcc
-DOCKER_CXX?=g++
+DOCKER_CC?=cmake
+DOCKER_CXX?=cmake++
 
 DOCKER_DEPS_REPO?=${PROJECT_NAME}/
 DOCKER_DEPS_IMAGE?=${PROJECT_NAME}_build
@@ -61,6 +61,11 @@ build: gen-cmake ## Build source
 		make -j $$(nproc) ${TARGET}"
 	@echo
 	@echo "Build finished. The binaries are in ${CURDIR}/${DOCKER_BUILD_DIR}"
+
+.PHONY: run-docker
+run-docker: ## Connect to docker instance
+	docker run ${DOCKER_BASIC_RUN_PARAMS} \
+		${DOCKER_SHELL}
 
 .PHONY: test
 test: ## Run all tests
