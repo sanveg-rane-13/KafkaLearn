@@ -22,7 +22,7 @@ A kafka connecter project written in cpp
     `
     docker run -it --rm --name=kafka \
             --mount type=bind,source=${PWD},target=/src \
-            kafka:0.1 \
+            kafka:x.x \
             bash
     `
 
@@ -32,6 +32,15 @@ A kafka connecter project written in cpp
     cmake ..
     make
     `
+
+## Build Makefile
+
+- make build-docker-image
+
+- make gen-cmake
+
+- make build
+
 
 ## About
 

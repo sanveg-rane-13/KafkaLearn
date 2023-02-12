@@ -1,12 +1,14 @@
 PROJECT_NAME=kafka
-DOCKER_DEPS_VERSION=0.1
+PROJECT_VERSION=1.0
+DOCKER_DEPS_VERSION=1.0
 
-DOCKER_CC?=clang
-DOCKER_CXX?=clang++
+DOCKER_CC?=gcc
+DOCKER_CXX?=g++
 
 DOCKER_DEPS_REPO?=${PROJECT_NAME}/
 DOCKER_DEPS_IMAGE?=${PROJECT_NAME}_build
 DOCKER_DEPS_CONTAINER?=${DOCKER_DEPS_IMAGE}
+DOCKER_DEPS_FILE?=Dockerfile
 
 DOCKER_DEPS_IMAGE_BUILD_FLAGS?=--no-cache=true
 
@@ -24,11 +26,10 @@ DOCKER_CTEST_TIMEOUT?=5000
 DOCKER_BASIC_RUN_PARAMS?=-it --init --rm \
 					  --memory-swap=-1 \
 					  --ulimit core=-1 \
-					  --name="${DOCKER_DEPS_CONTAINER}" \
+					  --name="${DOCKER_DEPS_IMAGE}" \
 					  --workdir=${DOCKER_SOURCE_PATH} \
 					  --mount type=bind,source=${LOCAL_SOURCE_PATH},target=${DOCKER_SOURCE_PATH} \
-					  ${DOCKER_ADDITIONAL_RUN_PARAMS} \
-					  ${DOCKER_DEPS_REPO}${DOCKER_DEPS_IMAGE}:${DOCKER_DEPS_VERSION}
+					  ${DOCKER_DEPS_IMAGE}:${DOCKER_DEPS_VERSION}
 
 IF_CONTAINER_RUNS=$(shell docker container inspect -f '{{.State.Running}}' ${DOCKER_DEPS_CONTAINER} 2>/dev/null)
 
@@ -41,8 +42,8 @@ help: ##
 	@cat $(MAKEFILE_LIST) | grep -E '^[a-zA-Z_-]+:.*?## .*$$' | \
 		awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-.PHONY: gen_cmake
-gen_cmake: ## Generate cmake files, used internally
+.PHONY: gen-cmake
+gen-cmake: ## Generate cmake files, used internally
 	docker run ${DOCKER_BASIC_RUN_PARAMS} \
 		${DOCKER_SHELL} -c \
 		"mkdir -p ${DOCKER_SOURCE_PATH}/${DOCKER_BUILD_DIR} && \
@@ -53,7 +54,7 @@ gen_cmake: ## Generate cmake files, used internally
 	@echo "CMake finished."
 
 .PHONY: build
-build: gen_cmake ## Build source
+build: gen-cmake ## Build source
 	docker run ${DOCKER_BASIC_RUN_PARAMS} \
 		${DOCKER_SHELL} -c \
 		"cd ${DOCKER_BUILD_DIR} && \
@@ -85,14 +86,11 @@ clean: ## Clean build directory
 		${DOCKER_SHELL} -c \
 		"rm -rf ${DOCKER_BUILD_DIR}"
 
-.PHONY: build-docker-deps-image
-build-docker-deps-image: ## Build the deps image.
-	docker build ${DOCKER_DEPS_IMAGE_BUILD_FLAGS} -t ${DOCKER_DEPS_REPO}${DOCKER_DEPS_IMAGE}:latest \
+.PHONY: build-docker-image
+build-docker-image: ## Build the deps image.
+	docker build ${DOCKER_DEPS_IMAGE_BUILD_FLAGS} -t ${DOCKER_DEPS_IMAGE}:${PROJECT_VERSION} \
 		-f ./${DOCKER_DEPS_FILE} .
 	@echo
-	@echo "Build finished. Docker image name: \"${DOCKER_DEPS_REPO}${DOCKER_DEPS_IMAGE}:latest\"."
-	@echo "Before you push it to Docker Hub, please tag it(DOCKER_DEPS_VERSION + 1)."
-	@echo "If you want the image to be the default, please update the following variables:"
-	@echo "${CURDIR}/Makefile: DOCKER_DEPS_VERSION"
+	@echo "Build finished. Docker image name: \"${DOCKER_DEPS_IMAGE}:${PROJECT_VERSION}\"."
 
 -include ${DOCKER_APPEND_MAKEFILES}
