@@ -1,9 +1,5 @@
 PROJECT_NAME=kafka
 PROJECT_VERSION=1.0
-DOCKER_DEPS_VERSION=1.0
-
-DOCKER_CC?=cmake
-DOCKER_CXX?=cmake++
 
 DOCKER_DEPS_REPO?=${PROJECT_NAME}/
 DOCKER_DEPS_IMAGE?=${PROJECT_NAME}_build
@@ -29,7 +25,7 @@ DOCKER_BASIC_RUN_PARAMS?=-it --init --rm \
 					  --name="${DOCKER_DEPS_IMAGE}" \
 					  --workdir=${DOCKER_SOURCE_PATH} \
 					  --mount type=bind,source=${LOCAL_SOURCE_PATH},target=${DOCKER_SOURCE_PATH} \
-					  ${DOCKER_DEPS_IMAGE}:${DOCKER_DEPS_VERSION}
+					  ${DOCKER_DEPS_IMAGE}:${PROJECT_VERSION}
 
 IF_CONTAINER_RUNS=$(shell docker container inspect -f '{{.State.Running}}' ${DOCKER_DEPS_CONTAINER} 2>/dev/null)
 
@@ -48,7 +44,6 @@ gen-cmake: ## Generate cmake files, used internally
 		${DOCKER_SHELL} -c \
 		"mkdir -p ${DOCKER_SOURCE_PATH}/${DOCKER_BUILD_DIR} && \
 		cd ${DOCKER_BUILD_DIR} && \
-		CC=${DOCKER_CC} CXX=${DOCKER_CXX} \
 		cmake ${DOCKER_CMAKE_FLAGS} .."
 	@echo
 	@echo "CMake finished."
