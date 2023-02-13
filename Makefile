@@ -20,6 +20,8 @@ DOCKER_BUILD_DIR?=build
 DOCKER_APP_PATH?=build/src/service
 DOCKER_CTEST_TIMEOUT?=5000
 
+KF_DOCKER_COMPOSE?=kf-docker-compose.yml
+
 DOCKER_BASIC_RUN_PARAMS?=-it --init --rm \
 					  --memory-swap=-1 \
 					  --ulimit core=-1 \
@@ -93,6 +95,16 @@ clean: ## Clean build directory
 	docker run ${DOCKER_BASIC_RUN_PARAMS} \
 		${DOCKER_SHELL} -c \
 		"rm -rf ${DOCKER_BUILD_DIR}"
+	
+
+
+.PHONY: kafka-up
+kafka-up: ## Start kafka broker
+	docker-compose -f ${KF_DOCKER_COMPOSE} up
+
+.PHONY: kafka-down
+kafka-down: ## Stop kafka broker
+	docker-compose -f ${KF_DOCKER_COMPOSE} down
 
 .PHONY: build-docker-image
 build-docker-image: ## Build the deps image.
