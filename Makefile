@@ -17,6 +17,7 @@ DOCKER_SHELL?=bash
 LOCAL_SOURCE_PATH?=${CURDIR}
 DOCKER_SOURCE_PATH?=/${PROJECT_NAME}
 DOCKER_BUILD_DIR?=build
+DOCKER_APP_PATH?=build/src/service
 DOCKER_CTEST_TIMEOUT?=5000
 
 DOCKER_BASIC_RUN_PARAMS?=-it --init --rm \
@@ -54,6 +55,7 @@ build: gen-cmake ## Build source
 		${DOCKER_SHELL} -c \
 		"cd ${DOCKER_BUILD_DIR} && \
 		make -j $$(nproc) ${TARGET}"
+
 	@echo
 	@echo "Build finished. The binaries are in ${CURDIR}/${DOCKER_BUILD_DIR}"
 
@@ -61,6 +63,12 @@ build: gen-cmake ## Build source
 run-docker: ## Connect to docker instance
 	docker run ${DOCKER_BASIC_RUN_PARAMS} \
 		${DOCKER_SHELL}
+
+.PHONY: run-app
+run-app: ## run application
+	docker run ${DOCKER_BASIC_RUN_PARAMS} \
+		${DOCKER_SHELL} -c \
+		"./${DOCKER_APP_PATH}/${PROJECT_NAME}"
 
 .PHONY: test
 test: ## Run all tests
